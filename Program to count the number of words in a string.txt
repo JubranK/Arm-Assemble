@@ -1,0 +1,77 @@
+;; Jubran Khoury 1201264 
+;; Program to count the number of words in a string. Suppose that words are separated by one space or more.  
+
+	PRESERVE8
+	THUMB 
+
+	AREA RESET, DATA, READONLY
+	EXPORT __Vectors
+__Vectors 
+	DCD 0x20001000 ; stack pointer value when stack is empty
+	DCD Reset_Handler ; reset vector
+ 
+	ALIGN
+; The program
+; Linker requires Reset_Handler
+
+     ; AREA MYRAM, DATA, READWRITE ; TO WRITE THE RESULTS INTO THE MEMORY
+		   
+string
+	DCB "ARM assembly language      is important to learn!",0
+
+	
+       AREA MYCODE, CODE, READONLY
+        ENTRY
+        EXPORT Reset_Handler
+Reset_Handler
+
+
+;;;;;;;;;;User Code Start from the next line;;;;;;;;;;;;
+
+	LDR R0,= string ; to hold the address of the first character in the string
+	
+	MOV R1,  #0 ; Counter for number of words
+	
+LOOP
+	LDRB R3,[R0]  ; check for the 0 (terminator), if yes => end of the string => end the counter
+	CMP R3, #0
+	BEQ countDone  ; end
+	 
+	CMP R3,#' '     ; if space, then 
+	BEQ countSpace_loop;
+
+	BNE COUNT_Word ;  If  not space => branch to COUNT_Word (track the chars in this word)
+	
+		
+countSpace_loop
+	ADD R0,R0,#1 ; Move to the next char
+	LDRB R3, [R0] ; Load the new character into R3
+	CMP R3,#' '     ; if space
+	BEQ countSpace_loop;
+	
+	;else (not space)
+	BNE LOOP 
+	
+COUNT_Word ; (to track the word)
+	ADD R0, R0, #1 ; Move to the next char
+	LDRB R3, [R0] ; Load the new character into R3
+	CMP R3, #' '  ; if space => complete word => add one to the counter 
+	BEQ Update_Counter 
+	; else (the next char is not space) => continue till the end of the word (next space)
+	CMP R3, #0 ; end of the whole string
+	ADDEQ R1,R1,#1 ; increment the counter(count the last word in the string, no need for space to count it)
+	BEQ LOOP
+	B COUNT_Word
+
+
+Update_Counter
+	ADD R1,R1,#1 ; increment the counter
+	ADD R0, R0, #1 ; Move to the next char
+	B LOOP  ; go back to the LOOP
+		
+countDone
+    B STOP
+
+STOP B STOP
+
+    END

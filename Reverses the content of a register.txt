@@ -1,0 +1,59 @@
+;; Jubran Khoury - 1201264 (section 4)
+;; First todo  -  Reverses the content of a register 
+
+	PRESERVE8
+	THUMB 
+
+	AREA RESET, DATA, READONLY
+	EXPORT __Vectors
+__Vectors 
+	DCD 0x20001000 ; stack pointer value when stack is empty
+	DCD Reset_Handler ; reset vector
+ 
+	ALIGN
+; The program
+; Linker requires Reset_Handler
+       AREA MYRAM, DATA, READWRITE ; TO WRITE THE RESULTS INTO THE MEMORY
+
+MEMO_C DCD 0
+MEMO_F DCD 0
+	
+       AREA MYCODE, CODE, READONLY
+        ENTRY
+        EXPORT Reset_Handler
+Reset_Handler
+
+
+;;;;;;;;;;The Code Start from the next line;;;;;;;;;;;;
+
+	LDR R0, =0x12345678 ; Load 0x12345678 into R0
+	MOV R1, #0x10 ; Set R1 to 10 (the divisor)
+	MOV R12, #0x0 ; Initialize R12 = 0 and to contain the reversed answer
+
+Loop
+	CMP R0, #0x0 ; If the number in the R0 is equal to 0 => no more division, so exit the loop
+	BEQ endLoop
+
+	; Calculate the mod
+	SDIV R3, R0, R1
+	MUL R4, R3, R1
+	SUBS R5, R0, R4 ; R5 contains the modulus
+
+	; R12 = R12 * 10 + R5 (Multiply the result by 10 and add the modulus)
+	MUL R11, R12, R1 ; Multiply R12 by 10
+	ADDS R12, R11, R5 ; Add the modulus
+
+	; Divide R0 by 10
+	SDIV R0, R0, R1
+
+	; Repeat until the number becomes 0
+	B Loop
+
+endLoop
+	; Now R12 contains the reversed number
+
+	ALIGN
+
+STOP B STOP
+
+	END
